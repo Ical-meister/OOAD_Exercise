@@ -180,7 +180,7 @@ class AuthService {
     }
 }
 
-// ---------- Dashboards (placeholder) ----------
+//Dashboards (placeholder) 
 
 class StudentDashboardFrame extends JFrame {
     public StudentDashboardFrame(Student student) {
@@ -211,3 +211,4 @@ class CoordinatorDashboardFrame extends JFrame {
         add(new JLabel("Welcome, " + coordinator.getName() + " (Coordinator)", SwingConstants.CENTER));
     }
 }
+
