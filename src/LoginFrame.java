@@ -32,7 +32,6 @@ public class LoginFrame extends JFrame {
         JLabel lblEmail = new JLabel("Email / Username:");
         JLabel lblPassword = new JLabel("Password:");
 
-
         txtEmail = new JTextField(20);
         txtPassword = new JPasswordField(20);
 
@@ -43,49 +42,30 @@ public class LoginFrame extends JFrame {
         btnLogin.addActionListener(e -> handleLogin());
         getRootPane().setDefaultButton(btnLogin);
 
-        //Row 0: Email
         gbc.gridy = 0;
-
         gbc.gridx = 0;
-        gbc.weightx = 0;
         panel.add(lblEmail, gbc);
 
         gbc.gridx = 1;
-        gbc.weightx = 1.0;
         panel.add(txtEmail, gbc);
 
-        //Row 1: Password
         gbc.gridy = 1;
-
         gbc.gridx = 0;
-        gbc.weightx = 0;
         panel.add(lblPassword, gbc);
 
         gbc.gridx = 1;
-        gbc.weightx = 1.0;
         panel.add(txtPassword, gbc);
 
-        //Row 2: Status
         gbc.gridy = 2;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
-        gbc.weightx = 1.0;
         panel.add(lblStatus, gbc);
 
-        //Row 3: Button
         gbc.gridy = 3;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
-        gbc.weightx = 0;
         panel.add(btnLogin, gbc);
 
         setContentPane(panel);
-
-
-        SwingUtilities.invokeLater(() -> txtEmail.requestFocusInWindow());
     }
-
-
 
     private void handleLogin() {
         String email = txtEmail.getText().trim();
@@ -103,9 +83,8 @@ public class LoginFrame extends JFrame {
         }
 
         User user = userOpt.get();
-        dispose(); // close login window
+        dispose();
 
-        // Route user automatically by their role/class
         switch (user.getRole()) {
             case STUDENT -> new StudentDashboardFrame((Student) user).setVisible(true);
             case EVALUATOR -> new EvaluatorDashboardFrame((Evaluator) user).setVisible(true);
@@ -118,7 +97,7 @@ public class LoginFrame extends JFrame {
     }
 }
 
-
+/* ===================== MODELS ===================== */
 
 enum RoleType { STUDENT, EVALUATOR, COORDINATOR }
 
@@ -144,11 +123,7 @@ abstract class User {
     public RoleType getRole() { return role; }
 }
 
-class Student extends User {
-    public Student(String userID, String name, String email, String password) {
-        super(userID, name, email, password, RoleType.STUDENT);
-    }
-}
+
 
 class Evaluator extends User {
     public Evaluator(String userID, String name, String email, String password) {
@@ -162,11 +137,12 @@ class Coordinator extends User {
     }
 }
 
+/* ===================== AUTH SERVICE ===================== */
+
 class AuthService {
     private final List<User> users = new ArrayList<>();
 
     public AuthService() {
-        // Hardcoded demo users (role is implied by the object type)
         users.add(new Student("S001", "Ali Student", "student", "1234"));
         users.add(new Evaluator("E001", "Dr. Tan Evaluator", "evaluator", "1234"));
         users.add(new Coordinator("C001", "Ms. Lim Coordinator", "coordinator", "1234"));
@@ -180,15 +156,25 @@ class AuthService {
     }
 }
 
-//Dashboards (placeholder) 
+/* ===================== DASHBOARDS ===================== */
 
 class StudentDashboardFrame extends JFrame {
+
     public StudentDashboardFrame(Student student) {
         setTitle("Student Dashboard");
-        setSize(500, 300);
+        setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        add(new JLabel("Welcome, " + student.getName() + " (Student)", SwingConstants.CENTER));
+        setLayout(new BorderLayout());
+
+        JLabel header = new JLabel(
+                "Welcome, " + student.getName() + " (Student)",
+                SwingConstants.CENTER
+        );
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        add(header, BorderLayout.NORTH);
+        add(new StudentPanel(student), BorderLayout.CENTER);
     }
 }
 
@@ -212,3 +198,59 @@ class CoordinatorDashboardFrame extends JFrame {
     }
 }
 
+/* ===================== STUDENT PANEL ===================== */
+
+class StudentPanel extends JPanel {
+
+    public StudentPanel(Student student) {
+
+        setLayout(new GridBagLayout());
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JTextField txtTitle = new JTextField(20);
+        JTextArea txtAbstract = new JTextArea(4, 20);
+        JTextField txtSupervisor = new JTextField(20);
+        JComboBox<String> cmbType = new JComboBox<>(new String[]{"Oral", "Poster"});
+        JTextField txtFilePath = new JTextField(20);
+
+        JButton btnSubmit = new JButton("Submit");
+
+        btnSubmit.addActionListener(e ->
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Submission saved successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                )
+        );
+
+        int row = 0;
+        addRow("Title:", txtTitle, gbc, row++);
+        addRow("Abstract:", new JScrollPane(txtAbstract), gbc, row++);
+        addRow("Supervisor:", txtSupervisor, gbc, row++);
+        addRow("Presentation Type:", cmbType, gbc, row++);
+        addRow("File Path:", txtFilePath, gbc, row++);
+
+        gbc.gridx = 1;
+        gbc.gridy = row;
+        add(btnSubmit, gbc);
+    }
+
+    private void addRow(String label, Component field,
+                        GridBagConstraints gbc, int row) {
+
+        gbc.gridy = row;
+
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        add(new JLabel(label), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        add(field, gbc);
+    }
+}
