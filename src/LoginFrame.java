@@ -3,6 +3,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/* ===================== LOGIN FRAME ===================== */
+
 public class LoginFrame extends JFrame {
 
     private JTextField txtEmail;
@@ -17,7 +19,6 @@ public class LoginFrame extends JFrame {
         setSize(420, 230);
         setLocationRelativeTo(null);
         setResizable(false);
-
         initUI();
     }
 
@@ -29,12 +30,8 @@ public class LoginFrame extends JFrame {
         gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblEmail = new JLabel("Email / Username:");
-        JLabel lblPassword = new JLabel("Password:");
-
         txtEmail = new JTextField(20);
         txtPassword = new JPasswordField(20);
-
         lblStatus = new JLabel(" ");
         lblStatus.setForeground(Color.RED);
 
@@ -42,23 +39,17 @@ public class LoginFrame extends JFrame {
         btnLogin.addActionListener(e -> handleLogin());
         getRootPane().setDefaultButton(btnLogin);
 
-        gbc.gridy = 0;
-        gbc.gridx = 0;
-        panel.add(lblEmail, gbc);
-
+        gbc.gridx = 0; gbc.gridy = 0;
+        panel.add(new JLabel("Email / Username:"), gbc);
         gbc.gridx = 1;
         panel.add(txtEmail, gbc);
 
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        panel.add(lblPassword, gbc);
-
+        gbc.gridx = 0; gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
         panel.add(txtPassword, gbc);
 
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
         panel.add(lblStatus, gbc);
 
         gbc.gridy = 3;
@@ -82,8 +73,8 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        User user = userOpt.get();
         dispose();
+        User user = userOpt.get();
 
         switch (user.getRole()) {
             case STUDENT -> new StudentDashboardFrame((Student) user).setVisible(true);
@@ -102,10 +93,7 @@ public class LoginFrame extends JFrame {
 enum RoleType { STUDENT, EVALUATOR, COORDINATOR }
 
 abstract class User {
-    private final String userID;
-    private final String name;
-    private final String email;
-    private final String password;
+    private final String userID, name, email, password;
     private final RoleType role;
 
     public User(String userID, String name, String email, String password, RoleType role) {
@@ -116,24 +104,21 @@ abstract class User {
         this.role = role;
     }
 
-    public String getUserID() { return userID; }
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public RoleType getRole() { return role; }
 }
 
-
-
 class Evaluator extends User {
-    public Evaluator(String userID, String name, String email, String password) {
-        super(userID, name, email, password, RoleType.EVALUATOR);
+    public Evaluator(String id, String name, String email, String password) {
+        super(id, name, email, password, RoleType.EVALUATOR);
     }
 }
 
 class Coordinator extends User {
-    public Coordinator(String userID, String name, String email, String password) {
-        super(userID, name, email, password, RoleType.COORDINATOR);
+    public Coordinator(String id, String name, String email, String password) {
+        super(id, name, email, password, RoleType.COORDINATOR);
     }
 }
 
@@ -144,113 +129,187 @@ class AuthService {
 
     public AuthService() {
         users.add(new Student("S001", "Ali Student", "student", "1234"));
-        users.add(new Evaluator("E001", "Dr. Tan Evaluator", "evaluator", "1234"));
-        users.add(new Coordinator("C001", "Ms. Lim Coordinator", "coordinator", "1234"));
+        users.add(new Evaluator("E001", "Dr. Tan", "evaluator", "1234"));
+        users.add(new Coordinator("C001", "Ms. Lim", "coordinator", "1234"));
     }
 
-    public Optional<User> login(String emailOrUsername, String password) {
+    public Optional<User> login(String email, String password) {
         return users.stream()
-                .filter(u -> u.getEmail().equalsIgnoreCase(emailOrUsername))
+                .filter(u -> u.getEmail().equalsIgnoreCase(email))
                 .filter(u -> u.getPassword().equals(password))
                 .findFirst();
     }
 }
 
-/* ===================== DASHBOARDS ===================== */
+/* ===================== STUDENT ===================== */
 
 class StudentDashboardFrame extends JFrame {
-
     public StudentDashboardFrame(Student student) {
         setTitle("Student Dashboard");
         setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        JLabel header = new JLabel(
-                "Welcome, " + student.getName() + " (Student)",
-                SwingConstants.CENTER
-        );
-        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        add(header, BorderLayout.NORTH);
-        add(new StudentPanel(student), BorderLayout.CENTER);
+        add(new StudentPanel(student));
     }
 }
+
+class StudentPanel extends JPanel {
+    public StudentPanel(Student student) {
+        setLayout(new GridLayout(0, 2, 8, 8));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        add(new JLabel("Title:"));
+        add(new JTextField());
+
+        add(new JLabel("Abstract:"));
+        add(new JTextArea(3, 20));
+
+        add(new JLabel("Supervisor:"));
+        add(new JTextField());
+
+        add(new JLabel("Presentation Type:"));
+        add(new JComboBox<>(new String[]{"Oral", "Poster"}));
+
+        add(new JLabel("File Path:"));
+        add(new JTextField());
+
+        JButton submit = new JButton("Submit");
+        submit.addActionListener(e ->
+                JOptionPane.showMessageDialog(this, "Submission saved successfully!")
+        );
+
+        add(new JLabel());
+        add(submit);
+    }
+}
+
+/* ===================== EVALUATOR ===================== */
 
 class EvaluatorDashboardFrame extends JFrame {
     public EvaluatorDashboardFrame(Evaluator evaluator) {
         setTitle("Evaluator Dashboard");
-        setSize(500, 300);
+        setSize(400, 250);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        add(new JLabel("Welcome, " + evaluator.getName() + " (Evaluator)", SwingConstants.CENTER));
+
+        JButton btnEvaluate = new JButton("Evaluate Presentation");
+        btnEvaluate.addActionListener(e -> {
+            EvaluationDialog d = new EvaluationDialog(this);
+            d.setVisible(true);
+        });
+
+        add(btnEvaluate, BorderLayout.CENTER);
     }
 }
+
+class EvaluationDialog extends JDialog {
+    public EvaluationDialog(JFrame parent) {
+        super(parent, "Evaluate Presentation", true);
+        setSize(400, 450);
+        setLocationRelativeTo(parent);
+        setLayout(new GridLayout(0, 1, 6, 6));
+
+        add(new JLabel("Presenter:"));
+        add(new JTextField("Ali Student"));
+
+        add(new JLabel("Problem Clarity (1–5):"));
+        add(new JSpinner(new SpinnerNumberModel(3, 1, 5, 1)));
+
+        add(new JLabel("Methodology (1–5):"));
+        add(new JSpinner(new SpinnerNumberModel(3, 1, 5, 1)));
+
+        add(new JLabel("Results (1–5):"));
+        add(new JSpinner(new SpinnerNumberModel(3, 1, 5, 1)));
+
+        add(new JLabel("Presentation (1–5):"));
+        add(new JSpinner(new SpinnerNumberModel(3, 1, 5, 1)));
+
+        add(new JLabel("Comments:"));
+        add(new JScrollPane(new JTextArea(3, 20)));
+
+        JButton submit = new JButton("Submit Evaluation");
+        submit.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Evaluation submitted successfully!");
+            dispose();
+        });
+        add(submit);
+    }
+}
+
+/* ===================== COORDINATOR ===================== */
 
 class CoordinatorDashboardFrame extends JFrame {
     public CoordinatorDashboardFrame(Coordinator coordinator) {
         setTitle("Coordinator Dashboard");
-        setSize(500, 300);
+        setSize(400, 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        add(new JLabel("Welcome, " + coordinator.getName() + " (Coordinator)", SwingConstants.CENTER));
+
+        JButton btnCreate = new JButton("Create Session");
+        JButton btnSchedule = new JButton("View Schedule");
+        JButton btnAwards = new JButton("Generate Awards");
+
+        btnCreate.addActionListener(e -> {
+            CreateSessionDialog d = new CreateSessionDialog(this);
+            d.setVisible(true);
+        });
+
+        btnSchedule.addActionListener(e -> {
+            ViewScheduleDialog d = new ViewScheduleDialog(this);
+            d.setVisible(true);
+        });
+
+        btnAwards.addActionListener(e -> {
+            AwardDialog d = new AwardDialog(this);
+            d.setVisible(true);
+        });
+
+        JPanel panel = new JPanel(new GridLayout(3, 1, 8, 8));
+        panel.add(btnCreate);
+        panel.add(btnSchedule);
+        panel.add(btnAwards);
+
+        add(panel);
     }
 }
 
-/* ===================== STUDENT PANEL ===================== */
+class CreateSessionDialog extends JDialog {
+    public CreateSessionDialog(JFrame parent) {
+        super(parent, "Create Session", true);
+        setSize(300, 200);
+        setLocationRelativeTo(parent);
+        setLayout(new GridLayout(0, 1, 6, 6));
 
-class StudentPanel extends JPanel {
+        add(new JTextField("Date"));
+        add(new JTextField("Venue"));
+        add(new JComboBox<>(new String[]{"Oral", "Poster"}));
 
-    public StudentPanel(Student student) {
-
-        setLayout(new GridBagLayout());
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JTextField txtTitle = new JTextField(20);
-        JTextArea txtAbstract = new JTextArea(4, 20);
-        JTextField txtSupervisor = new JTextField(20);
-        JComboBox<String> cmbType = new JComboBox<>(new String[]{"Oral", "Poster"});
-        JTextField txtFilePath = new JTextField(20);
-
-        JButton btnSubmit = new JButton("Submit");
-
-        btnSubmit.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Submission saved successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
-        );
-
-        int row = 0;
-        addRow("Title:", txtTitle, gbc, row++);
-        addRow("Abstract:", new JScrollPane(txtAbstract), gbc, row++);
-        addRow("Supervisor:", txtSupervisor, gbc, row++);
-        addRow("Presentation Type:", cmbType, gbc, row++);
-        addRow("File Path:", txtFilePath, gbc, row++);
-
-        gbc.gridx = 1;
-        gbc.gridy = row;
-        add(btnSubmit, gbc);
-    }
-
-    private void addRow(String label, Component field,
-                        GridBagConstraints gbc, int row) {
-
-        gbc.gridy = row;
-
-        gbc.gridx = 0;
-        gbc.weightx = 0;
-        add(new JLabel(label), gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        add(field, gbc);
+        JButton save = new JButton("Save");
+        save.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Session created!");
+            dispose();
+        });
+        add(save);
     }
 }
+
+class ViewScheduleDialog extends JDialog {
+    public ViewScheduleDialog(JFrame parent) {
+        super(parent, "Schedule", true);
+        setSize(300, 200);
+        setLocationRelativeTo(parent);
+        add(new JScrollPane(new JTextArea("No sessions yet.")));
+    }
+}
+
+class AwardDialog extends JDialog {
+    public AwardDialog(JFrame parent) {
+        super(parent, "Awards", true);
+        setSize(300, 200);
+        setLocationRelativeTo(parent);
+        add(new JTextArea("Best Oral: TBD\nBest Poster: TBD\nPeople's Choice: TBD"));
+    }
+}
+
+
+
