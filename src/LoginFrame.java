@@ -282,43 +282,7 @@ class CoordinatorDashboardFrame extends JFrame {
     }
 }
 
-class CreateSessionDialog extends JDialog {
-    public CreateSessionDialog(JFrame parent) {
-        super(parent, "Create Session", true);
-        setSize(300, 200);
-        setLocationRelativeTo(parent);
-        setLayout(new GridLayout(0, 1, 6, 6));
 
-        add(new JTextField("Date"));
-        add(new JTextField("Venue"));
-        add(new JComboBox<>(new String[]{"Oral", "Poster"}));
-
-        JButton save = new JButton("Save");
-        save.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Session created!");
-            dispose();
-        });
-        add(save);
-    }
-}
-
-class ViewScheduleDialog extends JDialog {
-    public ViewScheduleDialog(JFrame parent) {
-        super(parent, "Schedule", true);
-        setSize(300, 200);
-        setLocationRelativeTo(parent);
-        add(new JScrollPane(new JTextArea("No sessions yet.")));
-    }
-}
-
-class AwardDialog extends JDialog {
-    public AwardDialog(JFrame parent) {
-        super(parent, "Awards", true);
-        setSize(300, 200);
-        setLocationRelativeTo(parent);
-        add(new JTextArea("Best Oral: TBD\nBest Poster: TBD\nPeople's Choice: TBD"));
-    }
-}
 
 
 
