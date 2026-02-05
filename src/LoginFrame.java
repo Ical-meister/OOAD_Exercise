@@ -186,7 +186,9 @@ class StudentPanel extends JPanel {
 /* ===================== EVALUATOR ===================== */
 
 class EvaluatorDashboardFrame extends JFrame {
+
     public EvaluatorDashboardFrame(Evaluator evaluator) {
+
         setTitle("Evaluator Dashboard");
         setSize(400, 250);
         setLocationRelativeTo(null);
@@ -198,9 +200,16 @@ class EvaluatorDashboardFrame extends JFrame {
             d.setVisible(true);
         });
 
-        add(btnEvaluate, BorderLayout.CENTER);
+        JPanel panel = new JPanel(); // FlowLayout by default
+        panel.add(new JLabel(
+                "Welcome, " + evaluator.getName() + " (Evaluator)"
+        ));
+        panel.add(btnEvaluate);
+
+        add(panel);
     }
 }
+
 
 class EvaluationDialog extends JDialog {
     public EvaluationDialog(JFrame parent) {
